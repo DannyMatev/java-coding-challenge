@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-table-products
+      author: liquibase
+      changes:
+        - loadUpdateData:
+            tableName: products
+            primaryKey: id
+            file: db/data/products.csv
+            separator: ","
+            quotchar: "'"
