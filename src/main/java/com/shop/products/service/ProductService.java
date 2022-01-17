@@ -5,6 +5,8 @@ import com.shop.products.dto.ProductResponse;
 import com.shop.products.dto.UpdateProductDTO;
 import com.shop.products.entity.CategoryProjection;
 import com.shop.products.entity.ProductEntity;
+import com.shop.products.exception.ProductNotFoundException;
+import com.shop.products.exception.ProductQuantityNotAvailableException;
 import com.shop.products.repository.ProductRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +37,7 @@ public class ProductService {
     }
 
     public ProductResponse fetchById(Long id) {
-        ProductEntity entity = productRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        ProductEntity entity = productRepository.findById(id).orElseThrow(ProductNotFoundException::new);
 
         return modelMapper.map(entity, ProductResponse.class);
     }
@@ -48,7 +50,7 @@ public class ProductService {
     }
 
     public void updateProduct(Long id, UpdateProductDTO updateProductDTO) {
-        ProductEntity existingEntity = productRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        ProductEntity existingEntity = productRepository.findById(id).orElseThrow(ProductNotFoundException::new);
         ProductEntity updateEntity = modelMapper.map(updateProductDTO, ProductEntity.class);
         updateEntity.setId(existingEntity.getId());
 
@@ -61,15 +63,16 @@ public class ProductService {
         }
     }
 
-    public void orderProduct(Long id, int quantity) {
-        ProductEntity product = productRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+    public synchronized void orderProduct(Long id, int quantity) {
+        ProductEntity product = productRepository.findById(id).orElseThrow(ProductNotFoundException::new);
 
         if (product.getQuantity() < quantity) {
-            throw new RuntimeException("Not enough items in the warehouse");
+            throw new ProductQuantityNotAvailableException("Not enough items in the warehouse");
         }
 
         product.setQuantity(product.getQuantity() - quantity);
         productRepository.save(product);
+
     }
 
     public List<CategoryProjection> fetchAllCategories() {

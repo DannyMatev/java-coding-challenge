@@ -8,9 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.net.URI;
 
 @RestController
@@ -38,7 +40,7 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductResponse> createProduct(@RequestBody CreateProductDTO createProductDTO) {
+    public ResponseEntity<ProductResponse> createProduct(@RequestBody @Valid CreateProductDTO createProductDTO) {
         ProductResponse response = productService.createProduct(createProductDTO);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -51,7 +53,7 @@ public class ProductController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateProduct(@PathVariable("id") Long id,
-                                              @RequestBody UpdateProductDTO updateProductDTO) {
+                                              @RequestBody @Valid UpdateProductDTO updateProductDTO) {
         productService.updateProduct(id, updateProductDTO);
 
         return ResponseEntity.ok().build();
